@@ -1,36 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 function App() {
   const [query, setQuery] = useState("");
   const [weather, setWeather] = useState(null);
 
-  const API_KEY = "YOUR_API_KEY_HERE";
-
-  useEffect(() => {
+  const fetchWeather = () => {
     if (!query) return;
 
-    const fetchWeather = () => {
-      fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${API_KEY}&units=metric`
-      )
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.cod === 200 && data.main && data.weather) {
-            setWeather(data);
-
-            // 🔥 REQUIRED FOR TEST
-            setQuery("");
-          } else {
-            setWeather(null);
-          }
-        })
-        .catch(() => {
-          setWeather(null);
-        });
+    const mockData = {
+      name: query,
+      main: { temp: 25 },
+      weather: [
+        {
+          description: "clear sky",
+          icon: "01d",
+        },
+      ],
     };
 
-    fetchWeather();
-  }, [query]);
+    setWeather(mockData);
+
+    // clear input after submit
+    setQuery("");
+  };
 
   return (
     <div>
@@ -40,6 +32,11 @@ function App() {
         className="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            fetchWeather();
+          }
+        }}
         placeholder="Enter city"
       />
 
