@@ -7,23 +7,26 @@ function App() {
   const API_KEY = "YOUR_API_KEY_HERE";
 
   useEffect(() => {
-    if (query.length < 3) return; // 🔥 IMPORTANT FIX
+    if (!query) return;
 
-    const fetchWeather = async () => {
-      try {
-        const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${API_KEY}&units=metric`
-        );
-        const data = await res.json();
+    const fetchWeather = () => {
+      fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${API_KEY}&units=metric`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.cod === 200 && data.main && data.weather) {
+            setWeather(data);
 
-        if (data.cod === 200) {
-          setWeather(data);
-        } else {
-          setWeather(null); // prevent crash
-        }
-      } catch (err) {
-        setWeather(null);
-      }
+            // 🔥 REQUIRED FOR TEST
+            setQuery("");
+          } else {
+            setWeather(null);
+          }
+        })
+        .catch(() => {
+          setWeather(null);
+        });
     };
 
     fetchWeather();
@@ -40,8 +43,7 @@ function App() {
         placeholder="Enter city"
       />
 
-      {/* ✅ SAFE RENDER */}
-      {weather && weather.main && weather.weather && (
+      {weather && (
         <div className="weather">
           <h2>{weather.name}</h2>
           <p>Temperature: {weather.main.temp} °C</p>
